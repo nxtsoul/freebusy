@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<info>
+    <id>freebusy</id>
+    <name>FreeBusy</name>
+    <summary>Federated Free/Busy availability for Nextcloud</summary>
+    <description>
+	Share and query Free/Busy calendar availability between local and federated Nextcloud instances.
+        FreeBusy enables secure availability federation using remote domain configuration and token-based authentication.
+    </description>
+    <version>1.3.9</version>
+    <licence>agpl</licence>
+    <author mail="nt@andreghetone.com.br">
+	Natã Andreghetone
+    </author>
+
+    <namespace>Freebusy</namespace>
+    <category>organization</category>
+
+    <website>
+        https://github.com/nxtsoul/freebusy
+    </website>
+
+    <bugs>
+        https://github.com/nxtsoul/freebusy/issues
+    </bugs>
+
+    <repository type="git">
+        https://github.com/b612/freebusy
+    </repository>
+    
+    <dependencies>
+        <nextcloud min-version="27" max-version="99"/>
+    </dependencies>
+
+    <settings>
+    	<admin>OCA\Freebusy\Settings\Admin</admin>
+    	<admin-section>OCA\Freebusy\Settings\Section</admin-section>
+    </settings>
+</info>

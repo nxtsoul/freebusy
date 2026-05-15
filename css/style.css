@@ -1,0 +1,237 @@
+:root {
+  --availability-warning-color: rgb(255 210 0);
+  --availability-slot-selected: rgb(100, 153, 255);
+  --availability-slot-free: rgb(31, 46, 54);
+}
+
+.availability-container {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}	
+
+.availability-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.availability-grid {
+    border-collapse: collapse;
+    min-width: 1600px;
+    width: max-content;
+}
+
+.availability-user-cell,
+.availability-user-header {
+    position: sticky;
+    left: 0;
+
+    background: var(--color-main-background) !important;
+    color: var(--color-text-maxcontrast);
+
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px;
+    border-right: 1px solid var(--color-border);
+    white-space: nowrap;
+
+    z-index: 2;
+    padding-right: 1rem;
+}
+
+.availability-hour {
+    font-size: 12px;
+    padding: 2px;
+    border-right: 1px solid var(--color-border);
+    color: var(--color-text-maxcontrast);
+}
+
+.availability-cell {
+    width: 80px;
+    height: 45px;
+    padding: 0;
+    border-right: 1px solid var(--color-border);
+}
+
+.availability-title {
+    display: flex;
+    gap: 15px;
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    margin-top: 10px;
+}
+
+#availability-title-warning {
+    color: var(--availability-warning-color);
+    font-size: 13px;
+    font-weight: normal;
+}
+
+.user-avatar.has-conflict img {
+    border: 2px solid var(--availability-warning-color) !important;
+}
+
+.hour-slot {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.slot {
+    flex: 1;
+    height: 100%;
+}
+
+.slot.free {
+    background: var(--color-primary-element-light);
+    opacity: 0.25;
+}
+
+.slot.busy {
+    background: var(--availability-warning-color);
+    opacity: 0.3;
+}
+
+.slot.selected {
+    background: var(--availability-slot-selected);
+}
+
+.slot.selected-conflict {
+    background:
+        repeating-linear-gradient(
+            45deg,
+            rgba(255, 193, 7, 0.95),
+            rgba(255, 193, 7, 0.95) 4px,
+            var(--availability-slot-selected) 4px,
+            var(--availability-slot-selected) 8px
+        );
+}
+
+.user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-avatar img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+}
+
+#availability-tooltip {
+    position: absolute;
+    background: #1e1e1e;
+    color: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    min-width: 180px;
+    max-width: 520px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    z-index: 99999;
+    display: none;
+    pointer-events: none;
+}
+
+.tooltip-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.tooltip-row {
+    opacity: 0.9;
+    margin-bottom: 4px;
+}
+
+.tooltip-desc {
+    margin-top: 6px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* SKELETON AREA */
+
+.availability-grid.loading .slot {
+    background: #2a2a2a;
+    opacity: 1;
+}
+
+.skeleton-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #2a2a2a;
+}
+
+/* shimmer elegante */
+.availability-grid.loading .slot,
+.skeleton-avatar {
+    position: relative;
+    overflow: hidden;
+}
+
+.availability-grid.loading .slot::after,
+.skeleton-avatar::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 150%;
+    height: 100%;
+    background-color: rgba(255,255,255,0.06);
+}
+
+
+.availability-legend {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    opacity: 0.9;
+    justify-content: center;
+}
+
+.availability-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.availability-legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+}
+
+.availability-legend-color.free {
+    background: var(--availability-slot-free);
+}
+
+.availability-legend-color.selected {
+    background: rgb(45 65 103);
+}
+
+.availability-legend-color.busy {
+    background: rgb(93 79 16);
+}
+
+.availability-legend-color.selected-conflict {
+    background:
+        repeating-linear-gradient(
+            45deg,
+            rgb(93 79 16),
+            rgb(93 79 16) 4px,
+            rgb(45 65 103) 4px,
+            rgb(45 65 103) 8px
+        );
+}
