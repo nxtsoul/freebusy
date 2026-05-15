@@ -123,7 +123,8 @@ function observeCalendarViews() {
 }
 observeCalendarViews();
 window.addEventListener('popstate', () => { document.querySelector('#availability-box')?.remove(); });
-document.addEventListener('click', (e) => {
+// Bloquear ação no frontend ???
+/*document.addEventListener('click', (e) => {
     if (e.target.innerText?.includes('Salvar')) {
         const data = window.__availabilityData;
         if (data?.hasConflict) {
@@ -132,7 +133,7 @@ document.addEventListener('click', (e) => {
             alert('Conflito de horário detectado!');
         }
     }
-});
+});*/
 
 let availabilityTimeout = null;
 let participantsObserver = null;
@@ -260,26 +261,55 @@ function getEventRange() {
 
     if (!modal) return null;
 
-    const fromBlock = modal.querySelector('.property-title-time-picker__time-pickers-from');
-    const toBlock   = modal.querySelector('.property-title-time-picker__time-pickers-to');
+    const fromBlock = modal.querySelector(
+        '.property-title-time-picker__time-pickers-from'
+    );
 
-    const isAllDay = modal.querySelector('input[type="checkbox"]')?.checked;
+    const toBlock = modal.querySelector(
+        '.property-title-time-picker__time-pickers-to'
+    );
 
-    if (!fromBlock || !toBlock) return null;
+    if (!fromBlock || !toBlock) {
+        return null;
+    }
 
-    // 🔥 pega valores reais do Vue input
-    const startDate = fromBlock.querySelectorAll('.dp__input')[0]?.value;
-    const startTime = fromBlock.querySelectorAll('.dp__input')[1]?.value;
+    const isAllDay =
+        modal.querySelector('input[type="checkbox"]')?.checked || false;
 
-    const endDate = toBlock.querySelectorAll('.dp__input')[0]?.value;
-    const endTime = toBlock.querySelectorAll('.dp__input')[1]?.value;
+    let startDate;
+    let startTime;
+    let endDate;
+    let endTime;
 
-    if (isAllDay) {
+    // =========================================================
+    // NEXTCLOUD 33+ (Vue date picker)
+    // =========================================================
 
-        const start = parsePtBrDateTime(startDate, "00:00");
-        const end   = parsePtBrDateTime(endDate, "23:59");
+    const fromDp = fromBlock.querySelectorAll('.dp__input');
+    const toDp   = toBlock.querySelectorAll('.dp__input');
 
-        if (!start || !end) return null;
+    if (fromDp.length >= 2 && toDp.length >= 2) {
+
+        startDate = fromDp[0]?.value;
+        startTime = fromDp[1]?.value;
+
+        endDate = toDp[0]?.value;
+        endTime = toDp[1]?.value;
+
+        const start = parsePtBrDateTime(startDate, isAllDay ? '00:00' : startTime);
+        const end   = parsePtBrDateTime(endDate, isAllDay ? '23:59' : endTime);
+
+        if (!start || !end) {
+
+            console.warn('[Availability] falha parsing dp__input:', {
+                startDate,
+                startTime,
+                endDate,
+                endTime
+            });
+
+            return null;
+        }
 
         return {
             start: start.toISOString(),
@@ -287,55 +317,41 @@ function getEventRange() {
         };
     }
 
-    const start = parsePtBrDateTime(startDate, startTime);
-    const end   = parsePtBrDateTime(endDate, endTime);
+    // =========================================================
+    // NEXTCLOUD 32 (input native)
+    // =========================================================
 
-    if (!start || !end) {
-        console.warn('[Availability] falha parsing:', {
-            startDate, startTime, endDate, endTime
+    startDate = fromBlock.querySelector('input[type="date"]')?.value;
+    startTime = fromBlock.querySelector('input[type="time"]')?.value;
+
+    endDate = toBlock.querySelector('input[type="date"]')?.value;
+    endTime = toBlock.querySelector('input[type="time"]')?.value;
+
+    if (!startDate || !endDate) {
+
+        console.warn('[Availability] falha parsing legacy:', {
+            startDate,
+            startTime,
+            endDate,
+            endTime
         });
+
         return null;
     }
+
+    const start = new Date(
+        `${startDate}T${isAllDay ? '00:00' : startTime}`
+    );
+
+    const end = new Date(
+        `${endDate}T${isAllDay ? '23:59' : endTime}`
+    );
 
     return {
         start: start.toISOString(),
         end: end.toISOString()
     };
 }
-
-/*function getEventRange() {
-    const modal = document.querySelector('.event-popover__inner, .event-editor, .modal-container__content, .fc-event-editor');
-    if (!modal) return null;
-    const fromBlock = modal.querySelector('.property-title-time-picker__time-pickers-from');
-    const toBlock   = modal.querySelector('.property-title-time-picker__time-pickers-to');
-    const isAllDay = modal.querySelector('input[type="checkbox"]')?.checked;
-    if (!fromBlock || !toBlock) {
-        console.warn('[Availability] blocos não encontrados');
-        return null;
-    }
-    const startDate = fromBlock.querySelector('input[type="date"]')?.value;
-    const endDate   = toBlock.querySelector('input[type="date"]')?.value;
-    // 🔥 CASO DIA TODO
-    if (isAllDay) {
-        if (!startDate || !endDate) return null;
-        const start = new Date(`${startDate}T00:00:00`);
-        const end   = new Date(`${endDate}T23:59:59`);
-        return {
-            start: start.toISOString(),
-            end: end.toISOString()
-        };
-    }
-    // 🔥 CASO NORMAL (com hora)
-    const startTime = fromBlock.querySelector('input[type="time"]')?.value;
-    const endTime   = toBlock.querySelector('input[type="time"]')?.value;
-    if (!startDate || !startTime || !endDate || !endTime) {
-        console.warn('[Availability] valores incompletos', { startDate, startTime, endDate, endTime });
-        return null;
-    }
-    const start = new Date(`${startDate}T${startTime}`);
-    const end   = new Date(`${endDate}T${endTime}`);
-    return { start: start.toISOString(), end: end.toISOString() };
-}*/
 
 function createUserTooltip(user) {
     return `
@@ -362,11 +378,11 @@ function observeDateChanges(modal) {
     const check = () => {
 
         const dates = [
-            ...modal.querySelectorAll('input[type="date"]')
+            ...modal.querySelectorAll('input[type="date"], .dp__input')
         ].map(i => i.value);
 
         const times = [
-            ...modal.querySelectorAll('input[type="time"]')
+            ...modal.querySelectorAll('input[type="time"], .dp__input')
         ].map(i => i.value);
 
         // 🔥 NOVO CALENDÁRIO (Nextcloud Vue)
@@ -1020,3 +1036,4 @@ function escapeHtml(str) {
 }
 
 createTooltip();
+
